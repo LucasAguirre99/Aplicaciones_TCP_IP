@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml
+    kompose.version: 1.33.0 (3ce457399)
+  labels:
+    io.kompose.network/server-default: "true"
+    io.kompose.service: telegraf
+  name: telegraf
+  namespace: tcp-ip
+spec:
+  containers:
+    - image: telegraf
+      name: telegraf
+      volumeMounts:
+        - mountPath: /etc/telegraf/telegraf.conf
+          name: telegraf-cm0
+          subPath: telegraf.conf
+        - mountPath: /etc/telegraf/certs
+          name: telegraf-claim1
+  restartPolicy: OnFailure
+  volumes:
+    - configMap:
+        items:
+          - key: telegraf.conf
+            path: telegraf.conf
+        name: telegraf-cm0
+      name: telegraf-cm0
+    - name: telegraf-claim1
+      persistentVolumeClaim:
+        claimName: telegraf-claim1

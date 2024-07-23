@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml
+    kompose.version: 1.33.0 (3ce457399)
+  labels:
+    io.kompose.service: emqx
+  name: emqx
+  namespace: tcp-ip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: emqx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yaml
+        kompose.version: 1.33.0 (3ce457399)
+      labels:
+        io.kompose.network/server-default: "true"
+        io.kompose.service: emqx
+    spec:
+      containers:
+        - image: emqx
+          name: emqx
+          ports:
+            - containerPort: 18083
+              hostPort: 18083
+              protocol: TCP
+            - containerPort: 1883
+              hostPort: 1883
+              protocol: TCP
+            - containerPort: 8883
+              hostPort: 8883
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/emqx/data
+              name: emqx-claim0
+            - mountPath: /opt/emqx/log
+              name: emqx-claim1
+      restartPolicy: Always
+      volumes:
+        - name: emqx-claim0
+          persistentVolumeClaim:
+            claimName: emqx-claim0
+        - name: emqx-claim1
+          persistentVolumeClaim:
+            claimName: emqx-claim1
