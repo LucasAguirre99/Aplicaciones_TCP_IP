@@ -17,6 +17,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "applying manifiest"
+                sh 'apt update'
                 sh 'apt install snapd'
                 sh 'snap install kubectl --classic'
                 sh 'kubectl version --client'
