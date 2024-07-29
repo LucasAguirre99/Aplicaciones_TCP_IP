@@ -22,6 +22,27 @@ pipeline {
             }
         }
         
+        stage('Delete existing deployment') {
+            steps {
+                script {
+                    try {
+                        echo "Checking if Streamlit deployment exists"
+                        def deploymentExists = sh(script: 'kubectl get deployment streamlit -n tcp-ip', returnStatus: true) == 0
+                        if (deploymentExists) {
+                            echo "Deleting existing Streamlit deployment"
+                            sh 'kubectl delete deployment streamlit -n tcp-ip'
+                            echo "Waiting for deployment to be fully deleted..."
+                            sh 'kubectl wait --for=delete deployment/streamlit -n tcp-ip --timeout=60s'
+                        } else {
+                            echo "Streamlit deployment does not exist, proceeding with creation"
+                        }
+                    } catch (Exception e) {
+                        echo "Error checking or deleting deployment: ${e.message}"
+                    }
+                }
+            }
+        }
+        
         stage('Deploy') {
             steps {
                 script {
