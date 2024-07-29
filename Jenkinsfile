@@ -14,6 +14,28 @@ pipeline {
                 sh 'pwd' 
             }
         }
+        
+        stage('Diagnóstico') {
+            steps {
+                sh 'kubectl version --client'
+                sh 'kubectl config view'
+                sh 'kubectl cluster-info'
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        sh 'kubectl apply -f docs/03-Proyecto_Final/proyecto/server/kubernetes/streamlit/streamlit-deployment.yaml'
+                    } catch (Exception e) {
+                        echo "Error al aplicar el manifiesto. Intentando sin validación..."
+                        sh 'kubectl apply -f docs/03-Proyecto_Final/proyecto/server/kubernetes/streamlit/streamlit-deployment.yaml --validate=false'
+                    }
+                }
+            }
+        }
+                
         stage('Deploy') {
             steps {
                 echo "applying manifiest"
